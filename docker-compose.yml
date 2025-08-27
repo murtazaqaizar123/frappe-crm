@@ -8,7 +8,6 @@ services:
       - /bin/bash
       - /workspace/init.sh
     depends_on:
-      - mariadb
       - redis
     networks:
       - frappe_network
@@ -17,28 +16,39 @@ services:
       - 'logs:/home/frappe/frappe-bench/logs'
     environment:
       SITE_NAME: '${SITE_NAME}'
-      MARIADB_HOST: '${MARIADB_HOST}'
-      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+      MARIADB_HOST: '${COOLIFY_MARIADB_HOST}'
+      MARIADB_PORT: '${COOLIFY_MARIADB_PORT}'
+      MYSQL_ROOT_PASSWORD: '${COOLIFY_MARIADB_PASSWORD}'
+      MYSQL_USER: '${COOLIFY_MARIADB_USERNAME}'
+      MYSQL_DATABASE: '${COOLIFY_MARIADB_DATABASE}'
       ADMIN_PASSWORD: '${ADMIN_PASSWORD}'
-      REDIS_URL: '${REDIS_URL}'
-  mariadb:
-    image: 'mariadb:10.6'
-    environment:
-      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
-    networks:
-      - frappe_network
-    volumes:
-      - 'mariadb_data:/var/lib/mysql'
+      REDIS_URL: 'redis://redis:6379'
+
   redis:
     image: 'redis:alpine'
+    container_name: crm-redis
     networks:
       - frappe_network
     volumes:
       - 'redis_data:/data'
+
+  nginx:
+    image: nginx:latest
+    container_name: crm-nginx
+    depends_on:
+      - frappe
+    ports:
+      - "80:80"
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites:ro
+      - ./nginx:/etc/nginx/conf.d:ro
+    networks:
+      - frappe_network
+
 networks:
   frappe_network: null
+
 volumes:
   sites: null
   logs: null
-  mariadb_data: null
   redis_data: null
