@@ -38,7 +38,7 @@ services:
     depends_on:
       - frappe
     ports:
-      - "80:80"
+      - "8870:80"
     volumes:
       - sites:/home/frappe/frappe-bench/sites:ro
       - ./nginx:/etc/nginx/conf.d:ro
