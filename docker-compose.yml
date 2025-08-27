@@ -1,0 +1,44 @@
+version: '3'
+services:
+  frappe:
+    image: 'murtazaqaizar/frappe-crm:latest'
+    container_name: crm-backend
+    working_dir: /workspace
+    command:
+      - /bin/bash
+      - /workspace/init.sh
+    depends_on:
+      - mariadb
+      - redis
+    networks:
+      - frappe_network
+    volumes:
+      - 'sites:/home/frappe/frappe-bench/sites'
+      - 'logs:/home/frappe/frappe-bench/logs'
+    environment:
+      SITE_NAME: '${SITE_NAME}'
+      MARIADB_HOST: '${MARIADB_HOST}'
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+      ADMIN_PASSWORD: '${ADMIN_PASSWORD}'
+      REDIS_URL: '${REDIS_URL}'
+  mariadb:
+    image: 'mariadb:10.6'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+    networks:
+      - frappe_network
+    volumes:
+      - 'mariadb_data:/var/lib/mysql'
+  redis:
+    image: 'redis:alpine'
+    networks:
+      - frappe_network
+    volumes:
+      - 'redis_data:/data'
+networks:
+  frappe_network: null
+volumes:
+  sites: null
+  logs: null
+  mariadb_data: null
+  redis_data: null
